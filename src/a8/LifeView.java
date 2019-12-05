@@ -17,7 +17,6 @@ import javax.swing.JTextField;
 public class LifeView extends JPanel implements ActionListener, SpotListener {
 
 	private JSpotBoard _board;
-	private JSpotBoard _next_gen;
 	private JTextField _sizeF;
 	private JTextField _lowB;
 	private JTextField _highB;
@@ -32,14 +31,9 @@ public class LifeView extends JPanel implements ActionListener, SpotListener {
 
 		/* Create SpotBoard and message label. */
 		_board = new JSpotBoard(10, 10);
-		_next_gen = new JSpotBoard(10, 10);
 		listeners = new ArrayList<LifeController>();
 		
 		for (Spot s : _board) {
-			s.setBackground(new Color(0.8f, 0.8f, 0.8f));
-			s.setSpotColor(Color.BLACK);;
-		}
-		for (Spot s : _next_gen) {
 			s.setBackground(new Color(0.8f, 0.8f, 0.8f));
 			s.setSpotColor(Color.BLACK);;
 		}
@@ -48,6 +42,7 @@ public class LifeView extends JPanel implements ActionListener, SpotListener {
 
 		setLayout(new BorderLayout());
 		_temp = new JTextField("Set settings to begin the game of life!");
+		_temp.setEditable(false);
 		add(_temp, BorderLayout.CENTER);
 
 		/* Create subpanel for message area and reset button. */
@@ -132,6 +127,7 @@ public class LifeView extends JPanel implements ActionListener, SpotListener {
 		torus.setActionCommand("torus");
 		torus_panel.add(torus, BorderLayout.WEST);
 		_torusF = new JTextField("false");
+		_torusF.setEditable(false);
 		torus_panel.add(_torusF, BorderLayout.CENTER);
 		settings.add(torus_panel);
 		add(settings, BorderLayout.WEST);
@@ -141,8 +137,25 @@ public class LifeView extends JPanel implements ActionListener, SpotListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getActionCommand().equals("update settings") && 
-				(Integer.parseInt(_sizeF.getText()) < 10 || Integer.parseInt(_sizeF.getText()) > 500))
+				(Integer.parseInt(_sizeF.getText()) < 10 || Integer.parseInt(_sizeF.getText()) > 500)) {
+			_temp.setText("Illegal Size!");
+			add(_temp, BorderLayout.CENTER);
 			return;
+		}
+		if(e.getActionCommand().equals("update settings") && 
+				(Integer.parseInt(_lowB.getText()) < 0 || Integer.parseInt(_highB.getText()) > 8
+				|| Integer.parseInt(_lowB.getText()) > Integer.parseInt(_highB.getText()))) {
+			_temp.setText("Illegal Birth Threshold!");
+			add(_temp, BorderLayout.CENTER);
+			return;
+		}
+		if(e.getActionCommand().equals("update settings") && 
+				(Integer.parseInt(_lowS.getText()) < 0 || Integer.parseInt(_highS.getText()) > 8
+				|| Integer.parseInt(_lowS.getText()) > Integer.parseInt(_highS.getText()))) {
+			_temp.setText("Illegal Survival Threshold!");
+			add(_temp, BorderLayout.CENTER);
+			return;
+		}
 		if(e.getActionCommand().equals("torus"))
 			toggleTorus();
 		for(LifeController l : listeners)
@@ -196,6 +209,7 @@ public class LifeView extends JPanel implements ActionListener, SpotListener {
 		remove(_board);
 		_board = board;
 		add(_board, BorderLayout.CENTER);
+		_board.removeSpotListener(this);
 		_board.addSpotListener(this);
 		revalidate();
 		repaint();
